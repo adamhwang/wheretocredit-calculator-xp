@@ -27,7 +27,7 @@ getData(function(data, selectFn) {
                     if(i < results.value.length) {
                         
                         var result = results.value[i];
-                        if (result.success) {
+                        if (result.success && result.value.totals && result.value.totals.length) {
                             // filter results
                             result.value.totals = $.grep(result.value.totals, function (total) { return total.value > 0; });
 
