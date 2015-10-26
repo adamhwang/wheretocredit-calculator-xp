@@ -28,34 +28,37 @@ getData(function(data, selectFn) {
                         
                         var result = results.value[i];
                         if (result.success && result.value.totals && result.value.totals.length) {
+                          
                             // filter results
                             result.value.totals = $.grep(result.value.totals, function (total) { return total.value > 0; });
+                          
+                            if (result.value.totals.length) {
+                              // order results
+                              result.value.totals.sort(function (a, b) {
+                                  if (a.value === b.value) {
+                                      return +(a.name > b.name) || +(a.name === b.name) - 1;
+                                  }
+                                  return b.value - a.value; // desc
+                              });
 
-                            // order results
-                            result.value.totals.sort(function (a, b) {
-                                if (a.value === b.value) {
-                                    return +(a.name > b.name) || +(a.name === b.name) - 1;
-                                }
-                                return b.value - a.value; // desc
-                            });
-
-                            var container = $(selectFn(result.value.id));
-                            var height = container.height();
-                            
-                            var addDisclaimer = function (carrier) {
-                                if (carrier == 'UA' || carrier == 'DL') {
-                                    return '<span title="Revenue-based earning is only calculated for USD-denominated, multi-city searches and will not include carrier imposed surcharges (YQ/YR)." style="color: #f00; cursor: help;">*</span>';
-                                }
-                                return '';
-                            };
-                            
-                            var html = '<div class="wheretocredit-wrap" style="top: -' + (height+1) + 'px">' +
-                                           '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
-                                               result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
-                                           '</div>' +
-                                       '</div>';
-                            
-                            container.length && container.after(html);
+                              var container = $(selectFn(result.value.id));
+                              var height = container.height();
+                              
+                              var addDisclaimer = function (carrier) {
+                                  if (carrier == 'UA' || carrier == 'DL') {
+                                      return '<span title="Revenue-based earning is only calculated for USD-denominated, multi-city searches and will not include carrier imposed surcharges (YQ/YR)." style="color: #f00; cursor: help;">*</span>';
+                                  }
+                                  return '';
+                              };
+                              
+                              var html = '<div class="wheretocredit-wrap" style="top: -' + (height+1) + 'px">' +
+                                             '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
+                                                 result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
+                                             '</div>' +
+                                         '</div>';
+                              
+                              container.length && container.after(html);
+                            }
                         }
                         
                         setTimeout(function() { asyncLoop(i+1); }, 0);
