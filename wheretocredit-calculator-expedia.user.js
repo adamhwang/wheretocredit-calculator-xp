@@ -42,9 +42,16 @@ getData(function(data, selectFn) {
                             var container = $(selectFn(result.value.id));
                             var height = container.height();
                             
+                            var addDisclaimer = function (carrier) {
+                                if (carrier == 'UA' || carrier == 'DL') {
+                                    return '<span title="Revenue-based earning is only calculated for USD-denominated, multi-city searches and will not include carrier imposed surcharges (YQ/YR)." style="color: #f00; cursor: help;">*</span>';
+                                }
+                                return '';
+                            };
+                            
                             var html = '<div class="wheretocredit-wrap" style="top: -' + (height+1) + 'px">' +
                                            '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
-                                               result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' +seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' ' + seg.name + ' miles</div>'; }).join('') +
+                                               result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
                                            '</div>' +
                                        '</div>';
                             
@@ -124,6 +131,8 @@ function getData (callback) {
             var data = $.map(results, function (result, i) { 
                 return {
                     id: i,
+                    ticketingCarrier: result.fare.ticketingAirCarrierCodes.length ? result.fare.ticketingAirCarrierCodes[0] : null,
+                    baseFareUSD: result.fare.pricePerPassengerType.ADULT && result.fare.pricePerPassengerType.ADULT.currencyCode == 'USD' ? result.fare.pricePerPassengerType.ADULT.basePrice : null, 
                     segments: $.map(result.legs, function (leg) {
                         return $.map(leg.segments, function (seg) {
                             return {
