@@ -2,7 +2,7 @@
 // @name         wheretocredit.com calculator [xp]
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
 // @version      0.1
-// @description  Displays the number of frequent flyer miles you will earn next to Expedia and Travelocity (unaffiliated) search results!
+// @description  Displays the number of frequent flyer miles you can earn next to Expedia and Travelocity (unaffiliated) search results!
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
 // @include      http*://*.expedia.*/Flight-SearchResults*
@@ -65,7 +65,8 @@ var main = function () {
                             setTimeout(function() { asyncLoop(i+1); }, 0);
                         }
                         else {
-                            var disclaim = $('<div class="wheretocredit-disclaimer">Mileage calculations provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and are not affiliated or sponsored by Expedia.</div>');
+                            var ota = window.location.href.match(/expedia/i) ? 'Expedia' : 'Travelocity';
+                            var disclaim = $('<div class="wheretocredit-disclaimer">Mileage calculations provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and are not affiliated or sponsored by ' + ota + '.</div>');
                             disclaim.prependTo('.wheretocredit-wrap:first');
                             disclaim.css('top', -1 * disclaim.height() - 20 + 'px');
                         }
