@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         wheretocredit.com calculator - Expedia
-// @namespace    https://github.com/adamhwang/wheretocredit-calculator
+// @name         wheretocredit.com calculator [xp]
+// @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
 // @version      0.1
-// @description  wheretocredit.com calculator for Expedia and Travelocity
+// @description  Displays the number of frequent flyer miles you will earn next to Expedia and Travelocity (unaffiliated) search results!
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
 // @include      http*://*.expedia.*/Flight-SearchResults*
