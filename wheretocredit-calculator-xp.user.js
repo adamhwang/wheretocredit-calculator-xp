@@ -16,7 +16,7 @@ var main = function () {
 
     getData (function(data, selectFn) {
         injectCss();
-        $.ajax('//www.wheretocredit.com/api/beta/calculator', {
+        $.ajax('//www.wheretocredit.com/api/beta/calculate', {
             type : 'POST',
             contentType : 'application/json',
             dataType: 'json',
@@ -66,7 +66,7 @@ var main = function () {
                         }
                         else {
                             var ota = window.location.href.match(/expedia/i) ? 'Expedia' : 'Travelocity';
-                            var disclaim = $('<div class="wheretocredit-disclaimer">Mileage calculations provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and are not affiliated or sponsored by ' + ota + '.</div>');
+                            var disclaim = $('<div class="wheretocredit-disclaimer">Data provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</div>');
                             disclaim.prependTo('.wheretocredit-wrap:first');
                             disclaim.css('top', -1 * disclaim.height() - 20 + 'px');
                         }
