@@ -167,6 +167,7 @@ var main = function () {
 
     function injectCss() {
         var style = '<style type="text/css">' +
+                        '.segmented-list, .results-list { overflow: inherit !important; }' +
                         '.wheretocredit-wrap { height: 0; right: -230px; position: relative; float: right; font-size: 8pt; }' +
                         '.wheretocredit-disclaimer { position: absolute; left:0; background: #fff; border: solid 1px #ccc; padding: 10px; }' +
                         '.wheretocredit-container { float: left; overflow-y: scroll; background: #fff; border: solid 1px #ccc; padding: 10px; }' +
