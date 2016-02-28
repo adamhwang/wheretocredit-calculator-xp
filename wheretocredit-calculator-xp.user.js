@@ -4,10 +4,22 @@
 // @version      0.2
 // @description  Displays the number of frequent flyer miles you can earn next to Expedia and Travelocity (unaffiliated) search results!
 // @author       wheretocredit.com
-// @include      http*://*.expedia.*/Flights-Search*
-// @include      http*://*.expedia.*/Flight-SearchResults*
+// @include      http*://*.expedia.*.*/Flights-Search*
+// @include      http*://*.expedia.*.*/Flight-SearchResults*
 // @include      http*://*.travelocity.*/Flights-Search*
 // @include      http*://*.travelocity.*/Flight-SearchResults*
+// @include      http*://*.orbitz.*/Flights-Search*
+// @include      http*://*.orbitz.*/Flight-SearchResults*
+// @include      http*://*.cheaptickets.*/Flights-Search*
+// @include      http*://*.cheaptickets.*/Flight-SearchResults*
+// @include      http*://*.voyages-sncf.*/Flights-Search*
+// @include      http*://*.voyages-sncf.*/Flight-SearchResults*
+// @include      http*://*.wotif.*.*/Flights-Search*
+// @include      http*://*.wotif.*.*/Flight-SearchResults*
+// @include      http*://*.hotels.*/Flights-Search*
+// @include      http*://*.hotels.*/Flight-SearchResults*
+// @include      http*://*.hotwire.*/Flights-Search*
+// @include      http*://*.hotwire.*/Flight-SearchResults*
 // @grant        none
 // ==/UserScript==
 
@@ -64,7 +76,7 @@ var main = function () {
                             setTimeout(function() { asyncLoop(i+1); }, 0);
                         }
                         else {
-                            var ota = window.location.href.match(/expedia/i) ? 'Expedia' : 'Travelocity';
+                            var ota = $('#header-logo img').attr('alt') || $.grep(window.location.hostname.split('.'), function (n, i) { return i > 0; }).join('.').replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
                             var disclaim = $('<div class="wheretocredit-disclaimer">Data provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</div>');
                             disclaim.prependTo('.wheretocredit-wrap:first');
                             disclaim.css('top', -1 * disclaim.height() - 20 + 'px');
