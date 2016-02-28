@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wheretocredit.com calculator [xp]
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
-// @version      0.2
+// @version      1.0
 // @description  Displays the number of frequent flyer miles you can earn next to Expedia and Travelocity (unaffiliated) search results!
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*.*/Flights-Search*
@@ -28,7 +28,7 @@ var main = function () {
 
     getData (function(data, selectFn) {
         injectCss();
-        $.ajax('//www.wheretocredit.com/api/beta/calculate', {
+        $.ajax('//www.wheretocredit.com/api/1.0/calculate', {
             type : 'POST',
             contentType : 'application/json',
             dataType: 'json',
