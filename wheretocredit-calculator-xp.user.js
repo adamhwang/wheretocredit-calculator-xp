@@ -29,7 +29,6 @@ var main = function () {
                             
                             var result = results.value[i];
                             if (result.success && result.value.totals && result.value.totals.length) {
-                              
                                 // filter results
                                 result.value.totals = $.grep(result.value.totals, function (total) { return total.value > 0; });
                               
@@ -93,7 +92,6 @@ var main = function () {
                         };
                     });
                 };
-
                 if (flights.vent) {
                     // round trips search results
                     flights.vent.on('offerListView.renderComplete', function () {
@@ -109,9 +107,21 @@ var main = function () {
                         callback(data, function (id) { return 'div[data-offer-natural-key="' + id + '"]'; });
                     });
                 }
-                else if (uitk.subscribe) {
+                if (uitk.subscribe) {
                     // one way search results
                     uitk.subscribe('Flights.ModuleBuilder.Controller.renderComplete', function() {
+                        require(['uiModel'], function (uiModel) {
+                            var data = $.map(uiModel.rawData.offers, function (offer, natrualKey) {
+                                return {
+                                    id: offer.piid,
+                                    segments: $.map(offer.legIds, function (legId) {
+                                        var leg = flights.collections.legsCollection.models[0].attributes[legId];
+                                        return getSegments(leg);
+                                    })
+                                };
+                            });
+                            callback(data, function (id) { return 'li[piid="' + id + '"]'; });
+                        });
                         require(['loyaltyPoints'], function (loyaltyPoints) {
                             var data = $.map(loyaltyPoints.modulesCache, function (module) {
                                 return {
@@ -122,9 +132,6 @@ var main = function () {
                             callback(data, function (id) { return '#flightModule' + id; });
                         });
                     });
-                }
-                else {
-                    // unknown result page
                 }
             });
         }
