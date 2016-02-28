@@ -2,7 +2,7 @@
 // @name         wheretocredit.com calculator [xp]
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
 // @version      1.0
-// @description  Displays the number of frequent flyer miles you can earn next to Expedia and Travelocity (unaffiliated) search results!
+// @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*.*/Flights-Search*
 // @include      http*://*.expedia.*.*/Flight-SearchResults*
