@@ -1,6 +1,6 @@
 # Mileage Calculator [xp] by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a>
 ![](http://i.imgur.com/baKzGGP.png)
-This userscript automatically displays the number of frequent flyer miles you can potentially earn next to each Expedia and Traveloicty search result.
+This userscript automatically displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, and SNCF.
 
 ## Chrome Extension
 Add the <a href="https://chrome.google.com/webstore/detail/mileage-calculator-xp-by/gomddcmabinakjildbgfoabbiakfkkfk" target="_blank">Chrome Extension</a>
