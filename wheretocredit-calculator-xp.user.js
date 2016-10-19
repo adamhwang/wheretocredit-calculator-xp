@@ -65,13 +65,13 @@ var main = function () {
                                       return '';
                                   };
                                   
-                                  var html = '<div class="wheretocredit-wrap" style="top: -' + (height+1) + 'px">' +
+                                  var html = '<div class="wheretocredit-wrap">' +
                                                  '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
                                                      result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
                                                  '</div>' +
                                              '</div>';
                                   
-                                  container.length && container.after(html);
+                                  container.length && container.before(html);
                                 }
                             }
                             
