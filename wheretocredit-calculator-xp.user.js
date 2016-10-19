@@ -4,28 +4,30 @@
 // @version      1.0
 // @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
+// @include      http*://*.expedia.*/Flights-Search*
+// @include      http*://*.expedia.*/Flight-Search-All*
 // @include      http*://*.expedia.*.*/Flights-Search*
-// @include      http*://*.expedia.*.*/Flight-SearchResults*
+// @include      http*://*.expedia.*.*/Flight-Search-All*
 // @include      http*://*.travelocity.*/Flights-Search*
-// @include      http*://*.travelocity.*/Flight-SearchResults*
+// @include      http*://*.travelocity.*/Flight-Search-All*
 // @include      http*://*.orbitz.*/Flights-Search*
-// @include      http*://*.orbitz.*/Flight-SearchResults*
+// @include      http*://*.orbitz.*/Flight-Search-All*
 // @include      http*://*.cheaptickets.*/Flights-Search*
-// @include      http*://*.cheaptickets.*/Flight-SearchResults*
+// @include      http*://*.cheaptickets.*/Flight-Search-All*
 // @include      http*://*.voyages-sncf.*/Flights-Search*
-// @include      http*://*.voyages-sncf.*/Flight-SearchResults*
+// @include      http*://*.voyages-sncf.*/Flight-Search-All*
+// @include      http*://*.wotif.*/Flights-Search*
+// @include      http*://*.wotif.*/Flight-Search-All*
 // @include      http*://*.wotif.*.*/Flights-Search*
-// @include      http*://*.wotif.*.*/Flight-SearchResults*
+// @include      http*://*.wotif.*.*/Flight-Search-All*
 // @include      http*://*.hotels.*/Flights-Search*
-// @include      http*://*.hotels.*/Flight-SearchResults*
+// @include      http*://*.hotels.*/Flight-Search-All*
 // @include      http*://*.hotwire.*/Flights-Search*
-// @include      http*://*.hotwire.*/Flight-SearchResults*
+// @include      http*://*.hotwire.*/Flight-Search-All*
 // @grant        none
 // ==/UserScript==
 
 var main = function () {
-    var $;
-
     getData (function(data, selectFn) {
         injectCss();
         $.ajax('//www.wheretocredit.com/api/1.0/calculate', {
@@ -53,7 +55,7 @@ var main = function () {
                                       return b.value - a.value; // desc
                                   });
 
-                                  var container = $(selectFn(result.value.id));
+                                  var container = selectFn(result.value.id);
                                   var height = container.height();
                                   
                                   var addDisclaimer = function (carrier) {
@@ -88,93 +90,36 @@ var main = function () {
     });
 
     function getData (callback) {
-        if (window.require) {
-            require(['jquery', 'flights', 'uitk'], function (jQuery, flights, uitk) {
-                $ = jQuery;
-                var getSegments = function (leg) {
-                    return $.map($.grep(leg.timeline, function (timeline) { return timeline.segment; }), function (seg) {
-                        return {
-                            origin: seg.departureAirport.code,
-                            destination: seg.arrivalAirport.code,
-                            departure: new Date(seg.departureTime.dateTime),
-                            carrier: seg.carrier.airlineCode,
-                            operatingCarrier: seg.carrier.operatedBy ? (seg.carrier.operatedByAirlineCode || '??') : null,
-                            bookingClass: seg.carrier.bookingCode,
-                            flightNumber: seg.carrier.flightNumber
-                        };
-                    });
-                };
-                if (flights.vent) {
-                    // round trips search results
-                    flights.vent.on('offerListView.renderComplete', function () {
-                        var data = $.map(flights.views.applicationView.offerListView.collection.models, function (model) {
-                            return {
-                                id: model.attributes.naturalKey,
-                                segments: $.map(model.attributes.legIds, function (legId) {
-                                    var leg = flights.collections.legsCollection.models[0].attributes[legId];
-                                    return getSegments(leg);
-                                })
-                            };
-                        });
-                        callback(data, function (id) { return 'div[data-offer-natural-key="' + id + '"]'; });
-                    });
-                }
-                if (uitk.subscribe) {
-                    // one way search results
-                    uitk.subscribe('Flights.ModuleBuilder.Controller.renderComplete', function() {
-                        require(['uiModel'], function (uiModel) {
-                            var data = $.map(uiModel.rawData.offers, function (offer, natrualKey) {
-                                return {
-                                    id: offer.piid,
-                                    segments: $.map(offer.legIds, function (legId) {
-                                        var leg = flights.collections.legsCollection.models[0].attributes[legId];
-                                        return getSegments(leg);
-                                    })
-                                };
-                            });
-                            callback(data, function (id) { return 'li[piid="' + id + '"]'; });
-                        });
-                        require(['loyaltyPoints'], function (loyaltyPoints) {
-                            var data = $.map(loyaltyPoints.modulesCache, function (module) {
-                                return {
-                                    id: module.index,
-                                    segments: $.map(module.legs, getSegments)
-                                };
-                            });
-                            callback(data, function (id) { return '#flightModule' + id; });
-                        });
-                    });
-                }
-            });
-        }
-        else {
-            // multi-city search results
-            $ = window.jQuery;
-            $(function() {
-                var results = JSON.parse($('#jsonData').text());
-                var data = $.map(results, function (result, i) { 
+        require(['jquery', 'flights', 'uitk'], function ($, flights, uitk) {
+            var getSegments = function (leg) {
+                return $.map($.grep(leg.timeline, function (timeline) { return timeline.segment; }), function (seg) {
                     return {
-                        id: i,
-                        ticketingCarrier: result.fare.ticketingAirCarrierCodes.length ? result.fare.ticketingAirCarrierCodes[0] : null,
-                        baseFareUSD: result.fare.pricePerPassengerType.ADULT && result.fare.pricePerPassengerType.ADULT.currencyCode == 'USD' ? result.fare.pricePerPassengerType.ADULT.basePrice : null, 
-                        segments: $.map(result.legs, function (leg) {
-                            return $.map(leg.segments, function (seg) {
-                                return {
-                                    origin: seg.departureAirport.airportCode,
-                                    destination: seg.arrivalAirport.airportCode,
-                                    departure: new Date(seg.departureDate),
-                                    carrier: seg.airCarrierCode,
-                                    operatingCarrier: seg.operatingAirlineCode,
-                                    bookingClass: seg.bookingCode.trim(),
-                                    flightNumber: seg.flightNumber
-                                };
-                            });
-                        })
+                        origin: seg.departureAirport.code,
+                        destination: seg.arrivalAirport.code,
+                        departure: new Date(seg.departureTime.dateTime),
+                        carrier: seg.carrier.airlineCode,
+                        operatingCarrier: seg.carrier.operatedBy ? (seg.carrier.operatedByAirlineCode || '??') : null,
+                        bookingClass: seg.carrier.bookingCode,
+                        flightNumber: seg.carrier.flightNumber
                     };
                 });
-                callback(data, function (id) { return '#flightModuleControl' + id; });
+            };
+            
+            uitk.subscribe('Flights.ModuleBuilder.Controller.renderComplete', function() {
+                require(['uiModel'], function (uiModel) {
+                    var data = $.map(uiModel.rawData.offers, function (offer, natrualKey) {
+                        return {
+                            id: natrualKey,
+                            segments: $.map(offer.legIds, function (legId) {
+                                var leg = flights.collections.legsCollection.models[0].attributes[legId];
+                                return getSegments(leg);
+                            })
+                        };
+                    });
+                    callback(data, function (id) { return $(document.getElementById('flight-module-' + id.replace(/;/g, '_'))); });
+                });
             });
-        }
+        });
     }
 
     function injectCss() {
