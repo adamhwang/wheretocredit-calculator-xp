@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wheretocredit.com calculator [xp]
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
-// @version      1.1.1
+// @version      1.1.2
 // @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, ebookers, MrJet and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
@@ -32,15 +32,15 @@
 // ==/UserScript==
 
 var main = function () {
-    getData (function(data, selectFn) {
-        injectCss();
+    getData (function(data, offers) {
         $.ajax('//www.wheretocredit.com/api/1.0/calculate', {
             type : 'POST',
             contentType : 'application/json',
             dataType: 'json',
             data : JSON.stringify(data),
-            success: function (results, selector) {
+            success: function (results) {
                 if (results.success) {
+                    var ota = $('#header-logo img').attr('alt') || $.grep(window.location.hostname.split('.'), function (n, i) { return i > 0; }).join('.').replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
                     
                     (function asyncLoop (i) {
                         if (i < results.value.length) {
@@ -51,38 +51,50 @@ var main = function () {
                                 result.value.totals = $.grep(result.value.totals, function (total) { return total.value > 0; });
                               
                                 if (result.value.totals.length) {
-                                  // order results
-                                  result.value.totals.sort(function (a, b) {
-                                      if (a.value === b.value) {
-                                          return +(a.name > b.name) || +(a.name === b.name) - 1;
-                                      }
-                                      return b.value - a.value; // desc
-                                  });
+                                    // order results
+                                    result.value.totals.sort(function (a, b) {
+                                        if (a.value === b.value) {
+                                            return +(a.name > b.name) || +(a.name === b.name) - 1;
+                                        }
+                                        return b.value - a.value; // desc
+                                    });
 
-                                  var container = selectFn(result.value.id);
-                                  var height = container.height();
-                                  
-                                  var addDisclaimer = function (carrier) {
-                                      if (carrier == 'UA' || carrier == 'DL') {
-                                          return '<span title="Revenue-based earning is only calculated for USD-denominated, multi-city searches and will not include carrier imposed surcharges (YQ/YR)." style="color: #f00; cursor: help;">*</span>';
-                                      }
-                                      return '';
-                                  };
-                                  
-                                  var html = '<div class="wheretocredit-wrap">' +
-                                                 '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
-                                                     result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
-                                                 '</div>' +
-                                             '</div>';
-                                  
-                                  container.length && container.before(html);
+                                    var container = $(document.getElementById('flight-module-' + result.value.id.replace(/;/g, '_')));
+                                    if (container.length) {
+                                        var height = container.height();
+
+                                        var addDisclaimer = function (carrier) {
+                                            if (carrier == 'UA' || carrier == 'DL') {
+                                                return '<span title="Revenue-based earning is only calculated for USD-denominated, multi-city searches and will not include carrier imposed surcharges (YQ/YR)." style="color: #f00; cursor: help;">*</span>';
+                                            }
+                                            return '';
+                                        };
+
+                                        var html = '<div class="wheretocredit-wrap">' +
+                                            '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
+                                            result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
+                                            '</div>' +
+                                            '</div>';
+
+                                        container.before(html);
+
+                                        // ga event
+                                        var btn = container.find('button');
+                                        if (btn.length) {
+                                            var price = getOfferPrice(offers[result.value.id]);
+                                            var value = (price - bestPrice) / bestPrice;
+                                            value = Math.round(value * 1000); // ga only tracks ints
+                                            btn.click(function () {
+                                                wtcga('wtc.send', 'event', 'Trips', 'Select', ota, value);
+                                            });
+                                        }
+                                    }
                                 }
                             }
                             
                             setTimeout(function() { asyncLoop(i+1); }, 0);
                         }
                         else {
-                            var ota = $('#header-logo img').attr('alt') || $.grep(window.location.hostname.split('.'), function (n, i) { return i > 0; }).join('.').replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
                             var disclaim = $('<div class="wheretocredit-disclaimer">Data provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</div>');
                             disclaim.prependTo('.wheretocredit-wrap:first');
                             disclaim.css('top', -1 * disclaim.height() - 20 + 'px');
@@ -91,6 +103,12 @@ var main = function () {
                 }
             }
         });
+        
+        injectCss();
+        
+        
+        var getOfferPrice = function (offer) { return offer.price.exactPrice; };
+        var bestPrice = Math.min.apply(null, $.map(offers, getOfferPrice));
     });
 
     function getData (callback) {
@@ -120,7 +138,7 @@ var main = function () {
                             })
                         };
                     });
-                    callback(data, function (id) { return $(document.getElementById('flight-module-' + id.replace(/;/g, '_'))); });
+                    callback(data, uiModel.rawData.offers);
                 });
             });
         });
@@ -134,7 +152,7 @@ var main = function () {
                         '.wheretocredit-container { float: left; overflow-y: scroll; background: #fff; border: solid 1px #ccc; padding: 10px; }' +
                         '.wheretocredit-item { width: 180px; white-space: nowrap; text-overflow: ellipsis; }' +
                     '</style>';
-        $(style).appendTo('head')
+        $(style).appendTo('head');
     }
 };
 
@@ -146,3 +164,9 @@ else {
     script.textContent = '(' + main.toString() + ')();';
     document.body.appendChild(script);
 }
+
+// ga
+var script = document.createElement('script');
+script.type = "text/javascript";
+script.textContent = '!function(a,b,c,d,e,f,g){a.GoogleAnalyticsObject=e,a[e]=a[e]||function(){(a[e].q=a[e].q||[]).push(arguments)},a[e].l=1*new Date,f=b.createElement(c),g=b.getElementsByTagName(c)[0],f.async=1,f.src=d,g.parentNode.insertBefore(f,g)}(window,document,"script","https://www.google-analytics.com/analytics.js","wtcga"),wtcga("create","UA-60492056-7","auto","wtc"),wtcga("wtc.send","pageview");';
+document.body.appendChild(script);
