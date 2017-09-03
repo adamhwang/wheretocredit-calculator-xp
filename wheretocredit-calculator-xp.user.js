@@ -130,12 +130,19 @@ var main = function () {
             uitk.subscribe('Flights.ModuleBuilder.Controller.renderComplete', function() {
                 require(['uiModel'], function (uiModel) {
                     var data = $.map(uiModel.rawData.offers, function (offer, natrualKey) {
+                        if (flights && flights.collections && flights.legsCollection)
+                        {
+                            return {
+                                id: natrualKey,
+                                segments: $.map(offer.legIds, function (legId) {
+                                    var leg = flights.collections.legsCollection.models[0].attributes[legId];
+                                    return getSegments(leg);
+                                })
+                            };
+                        }
                         return {
                             id: natrualKey,
-                            segments: $.map(offer.legIds, function (legId) {
-                                var leg = flights.collections.legsCollection.models[0].attributes[legId];
-                                return getSegments(leg);
-                            })
+                            segments: $.map(offer.legs, getSegments)
                         };
                     });
                     callback(data, uiModel.rawData.offers);
