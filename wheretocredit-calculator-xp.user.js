@@ -147,6 +147,9 @@ var main = function () {
                             segments: $.map(offer.legs, getSegments)
                         };
                     });
+					data.sort(function (a, b) {
+						return a.baseFare - b.baseFare; // asc
+					});
                     callback(data, uiModel.rawData.offers);
                 });
             });
