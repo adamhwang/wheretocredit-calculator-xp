@@ -33,7 +33,7 @@
 
 var main = function () {
     getData (function(data, offers) {
-        $.ajax('//www.wheretocredit.com/api/1.0/calculate', {
+        $.ajax('//www.wheretocredit.com/api/2.0/calculate', {
             type : 'POST',
             contentType : 'application/json',
             dataType: 'json',
@@ -48,15 +48,15 @@ var main = function () {
                             var result = results.value[i];
                             if (result.success && result.value.totals && result.value.totals.length) {
                                 // filter results
-                                result.value.totals = $.grep(result.value.totals, function (total) { return total.value > 0; });
+                                result.value.totals = $.grep(result.value.totals, function (total) { return total.rdm[0] > 0; });
                               
                                 if (result.value.totals.length) {
                                     // order results
                                     result.value.totals.sort(function (a, b) {
-                                        if (a.value === b.value) {
+                                        if (a.rdm[0] === b.rdm[0]) {
                                             return +(a.name > b.name) || +(a.name === b.name) - 1;
                                         }
-                                        return b.value - a.value; // desc
+                                        return b.rdm[0] - a.rdm[0]; // desc
                                     });
 
                                     var container = $(document.getElementById('flight-module-' + result.value.id.replace(/;/g, '_')));
@@ -64,15 +64,15 @@ var main = function () {
                                         var height = container.height();
 
                                         var addDisclaimer = function (carrier) {
-                                            if (carrier == 'UA' || carrier == 'DL') {
-                                                return '<span title="Revenue-based earning is only calculated for USD-denominated, multi-city searches and will not include carrier imposed surcharges (YQ/YR)." style="color: #f00; cursor: help;">*</span>';
+                                            if (carrier == 'UA' || carrier == 'DL' || carrier == 'AA') {
+                                                return '<span title="Revenue-based earning is overestimated because taxes are included in the base fare." style="color: #f00; cursor: help;">*</span>';
                                             }
                                             return '';
                                         };
 
                                         var html = '<div class="wheretocredit-wrap">' +
                                             '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
-                                            result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
+                                            result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.rdm[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
                                             '</div>' +
                                             '</div>';
 
@@ -142,6 +142,8 @@ var main = function () {
                         }
                         return {
                             id: natrualKey,
+							baseFare: offer.price.exactPrice,
+							currency: offer.price.currencyCode,
                             segments: $.map(offer.legs, getSegments)
                         };
                     });
