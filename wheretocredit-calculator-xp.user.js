@@ -1,33 +1,24 @@
 // ==UserScript==
 // @name         wheretocredit.com calculator
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
-// @version      1.1.4
+// @version      1.1.5
 // @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, ebookers, MrJet and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
-// @include      http*://*.expedia.*/Flight-Search-All*
 // @include      http*://*.expedia.*.*/Flights-Search*
-// @include      http*://*.expedia.*.*/Flight-Search-All*
+// @include      http*://*.expedia-aarp.*/Flights-Search*
 // @include      http*://*.travelocity.*/Flights-Search*
-// @include      http*://*.travelocity.*/Flight-Search-All*
 // @include      http*://*.orbitz.*/Flights-Search*
-// @include      http*://*.orbitz.*/Flight-Search-All*
 // @include      http*://*.cheaptickets.*/Flights-Search*
-// @include      http*://*.cheaptickets.*/Flight-Search-All*
 // @include      http*://*.voyages-sncf.*/Flights-Search*
-// @include      http*://*.voyages-sncf.*/Flight-Search-All*
 // @include      http*://*.wotif.*/Flights-Search*
-// @include      http*://*.wotif.*/Flight-Search-All*
 // @include      http*://*.wotif.*.*/Flights-Search*
-// @include      http*://*.wotif.*.*/Flight-Search-All*
 // @include      http*://*.hotels.*/Flights-Search*
-// @include      http*://*.hotels.*/Flight-Search-All*
+// @include      http*://*.*.hotels.*/Flights-Search*
 // @include      http*://*.hotwire.*/Flights-Search*
-// @include      http*://*.hotwire.*/Flight-Search-All*
 // @include      http*://*.ebookers.*/Flights-Search*
-// @include      http*://*.ebookers.*/Flight-Search-All*
 // @include      http*://*.mrjet.*/Flights-Search*
-// @include      http*://*.mrjet.*/Flight-Search-All*
+// @include      http*://*.lastminute.*.*/Flights-Search*
 // @grant        none
 // ==/UserScript==
 
