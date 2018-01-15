@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wheretocredit.com calculator
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
-// @version      1.1.5
+// @version      1.2.0
 // @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, ebookers, MrJet and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
@@ -34,70 +34,63 @@ var main = function () {
 
         calc.then(function (results) {
             if (results.success) {
+				injectCss();
+		
                 var ota = $('#header-logo img').attr('alt') || $.grep(window.location.hostname.split('.'), function (n, i) { return i > 0; }).join('.').replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
 
                 (function asyncLoop (i) {
                     if (i < results.value.length) {
 
                         var result = results.value[i];
-                        if (result.success && result.value.totals && result.value.totals.length) {
+                        if (result.success && result.value.totals && result.value.totals) {
                             // filter results
                             result.value.totals = $.grep(result.value.totals, function (total) { return total.rdm[0] > 0; });
 
-                            if (result.value.totals.length) {
-                                // order results
-                                result.value.totals.sort(function (a, b) {
-                                    if (a.rdm[0] === b.rdm[0]) {
-                                        return +(a.name > b.name) || +(a.name === b.name) - 1;
-                                    }
-                                    return b.rdm[0] - a.rdm[0]; // desc
-                                });
+							// order results
+							result.value.totals.sort(function (a, b) {
+								if (a.rdm[0] === b.rdm[0]) {
+									return +(a.name > b.name) || +(a.name === b.name) - 1;
+								}
+								return b.rdm[0] - a.rdm[0]; // desc
+							});
 
-                                var container = $(document.getElementById('flight-module-' + result.value.id.replace(/;/g, '_')));
-                                if (container.length) {
-                                    var height = container.height();
+							var container = $(document.getElementById('flight-module-' + result.value.id.replace(/;/g, '_')));
+							if (container.length) {
+								var addDisclaimer = function (carrier) {
+									if (carrier == 'UA' || carrier == 'DL' || carrier == 'AA') {
+										return '<span title="Revenue-based earning is overestimated because taxes are included in the base fare." style="color: #f00; cursor: help;">*</span>';
+									}
+									return '';
+								};
 
-                                    var addDisclaimer = function (carrier) {
-                                        if (carrier == 'UA' || carrier == 'DL' || carrier == 'AA') {
-                                            return '<span title="Revenue-based earning is overestimated because taxes are included in the base fare." style="color: #f00; cursor: help;">*</span>';
-                                        }
-                                        return '';
-                                    };
+								var html =
+									'<div class="wheretocredit-wrapper secondary">' +
+									'<div class="wheretocredit-container">' +
+									(result.value.totals.length ? result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.rdm[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + '&nbsp;' + seg.name.replace(' ', '&nbsp;') + '&nbsp;miles</div>'; }).join('') : 'No known mileage earnings.') +
+									'<div class="wheretocredit-disclaimer">Data provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</div>' +
+									'</div>' +
+									'</div>';
 
-                                    var html = '<div class="wheretocredit-wrap">' +
-                                        '<div class="wheretocredit-container" style="height: ' + (height-1-20) + 'px;">' +
-                                        result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.rdm[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + ' ' + seg.name + ' miles</div>'; }).join('') +
-                                        '</div>' +
-                                        '</div>';
+								container.append(html);
 
-                                    container.before(html);
-
-                                    // ga event
-                                    var btn = container.find('button');
-                                    if (btn.length) {
-                                        var price = getOfferPrice(offers[result.value.id]);
-                                        var value = (price - bestPrice) / bestPrice;
-                                        value = Math.round(value * 1000); // ga only tracks ints
-                                        btn.click(function () {
-                                            wtcga('wtc.send', 'event', 'Trips', 'Select', ota, value);
-                                        });
-                                    }
-                                }
-                            }
+								// ga event
+								var btn = container.find('button');
+								if (btn.length) {
+									var price = getOfferPrice(offers[result.value.id]);
+									var value = (price - bestPrice) / bestPrice;
+									value = Math.round(value * 1000); // ga only tracks ints
+									btn.click(function () {
+										wtcga('wtc.send', 'event', 'Trips', 'Select', ota, value);
+									});
+								}
+							}
                         }
 
                         setTimeout(function() { asyncLoop(i+1); }, 0);
                     }
-                    else {
-                        var disclaim = $('<div class="wheretocredit-disclaimer">Data provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</div>');
-                        disclaim.prependTo('.wheretocredit-wrap:first');
-                        disclaim.css('top', -1 * disclaim.height() - 20 + 'px');
-                    }
                 })(0);
             }
         });
-        
-        injectCss();
         
         var getOfferPrice = function (offer) { return offer.price.exactPrice; };
         var bestPrice = Math.min.apply(null, $.map(offers, getOfferPrice));
@@ -150,11 +143,14 @@ var main = function () {
 
     function injectCss() {
         var style = '<style type="text/css">' +
-                        '.segmented-list, .results-list { overflow: inherit !important; }' +
-                        '.wheretocredit-wrap { height: 0; right: -230px; position: relative; float: right; font-size: 8pt; }' +
-                        '.wheretocredit-disclaimer { position: absolute; left:0; background: #fff; border: solid 1px #ccc; padding: 10px; }' +
-                        '.wheretocredit-container { float: left; overflow-y: scroll; background: #fff; border: solid 1px #ccc; padding: 10px; }' +
-                        '.wheretocredit-item { width: 180px; white-space: nowrap; text-overflow: ellipsis; }' +
+                        '.flight-module { padding-right: 180px !important; }' +
+                        '.wheretocredit-wrapper { height: 100%; position: absolute; top: 0; right: 0; background: #F2F8FD; }' +
+                        '.wheretocredit-wrapper:hover .wheretocredit-disclaimer { display: block; }' +
+                        '.wheretocredit-disclaimer { display: none; font-size: .8em; padding-top: 1.4em; }' +
+                        '.wheretocredit-container { height: 100%; width: 180px; overflow-y: scroll; overflow-x: hidden; padding: .7em; font-size: .9em; }' +
+                        '.wheretocredit-container::-webkit-scrollbar { width: 6px; }' +
+                        '.wheretocredit-container::-webkit-scrollbar-thumb { background-color: #6E99BA; }' +
+                        '.wheretocredit-item { text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }' +
                     '</style>';
         $(style).appendTo('head');
     }
