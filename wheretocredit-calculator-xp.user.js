@@ -147,7 +147,7 @@ var main = function () {
 
     function injectCss() {
         var style = '<style type="text/css">' +
-                        '.flight-module { padding-right: 180px !important; }' +
+                        '#flightModuleList .flight-module { padding-right: 180px !important; }' +
                         '.wheretocredit-wrapper { height: 100%; position: absolute; top: 0; right: 0; background: #F2F8FD; }' +
                         '.wheretocredit-wrapper:hover .wheretocredit-message { display: block; }' +
                         '.wheretocredit-message { display: none; font-size: .8em; margin-top: 1em; }' +
