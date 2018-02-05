@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wheretocredit.com calculator
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
-// @version      1.2.0
+// @version      1.2.1
 // @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, ebookers, MrJet and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
@@ -35,7 +35,7 @@ var main = function () {
         calc.then(function (results) {
             if (results.success) {
 				injectCss();
-		
+
                 var ota = $('#header-logo img').attr('alt') || $.grep(window.location.hostname.split('.'), function (n, i) { return i > 0; }).join('.').replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
 
                 (function asyncLoop (i) {
@@ -67,7 +67,8 @@ var main = function () {
 									'<div class="wheretocredit-wrapper secondary">' +
 									'<div class="wheretocredit-container">' +
 									(result.value.totals.length ? result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.rdm[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + '&nbsp;' + seg.name.replace(' ', '&nbsp;') + '&nbsp;miles</div>'; }).join('') : 'No known mileage earnings.') +
-									'<div class="wheretocredit-disclaimer">Data provided by <a href="http://www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</div>' +
+									'<p class="wheretocredit-message"><strong>Enjoying the miles? Help us out, rate us and leave feedback in the <a href="//chrome.google.com/webstore/detail/mileage-calculator-by-whe/gomddcmabinakjildbgfoabbiakfkkfk" target="_blank">Chrome Web Store</a>.</strong></p>' +
+                                    '<p class="wheretocredit-message">Data provided by <a href="//www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</p>' +
 									'</div>' +
 									'</div>';
 
@@ -91,7 +92,7 @@ var main = function () {
                 })(0);
             }
         });
-        
+
         var getOfferPrice = function (offer) { return offer.price.exactPrice; };
         var bestPrice = Math.min.apply(null, $.map(offers, getOfferPrice));
     });
@@ -111,7 +112,7 @@ var main = function () {
                     };
                 });
             };
-            
+
             flights.vent.on('uiModel.resetViewableOffers', function() {
                 require(['uiModel'], function (uiModel) {
                     var data = $.map(uiModel.rawData.offers, function (offer, natrualKey) {
@@ -145,8 +146,8 @@ var main = function () {
         var style = '<style type="text/css">' +
                         '.flight-module { padding-right: 180px !important; }' +
                         '.wheretocredit-wrapper { height: 100%; position: absolute; top: 0; right: 0; background: #F2F8FD; }' +
-                        '.wheretocredit-wrapper:hover .wheretocredit-disclaimer { display: block; }' +
-                        '.wheretocredit-disclaimer { display: none; font-size: .8em; padding-top: 1.4em; }' +
+                        '.wheretocredit-wrapper:hover .wheretocredit-message { display: block; }' +
+                        '.wheretocredit-message { display: none; font-size: .8em; margin-top: 1em; }' +
                         '.wheretocredit-container { height: 100%; width: 180px; overflow-y: scroll; overflow-x: hidden; padding: .7em; font-size: .9em; }' +
                         '.wheretocredit-container::-webkit-scrollbar { width: 6px; }' +
                         '.wheretocredit-container::-webkit-scrollbar-thumb { background-color: #6E99BA; }' +
