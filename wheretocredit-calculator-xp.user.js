@@ -31,13 +31,13 @@ var main = function () {
             dataType: 'json',
             data : JSON.stringify(data),
         }).then(function (results) {
-			calc = null;
-			return results;
-		});
+            calc = null;
+            return results;
+        });
 
         calc.then(function (results) {
             if (results.success) {
-				injectCss();
+                injectCss();
 
                 var ota = $('#header-logo img').attr('alt') || $.grep(window.location.hostname.split('.'), function (n, i) { return i > 0; }).join('.').replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
 
@@ -49,45 +49,61 @@ var main = function () {
                             // filter results
                             result.value.totals = $.grep(result.value.totals, function (total) { return total.rdm[0] > 0; });
 
-							// order results
-							result.value.totals.sort(function (a, b) {
-								if (a.rdm[0] === b.rdm[0]) {
-									return +(a.name > b.name) || +(a.name === b.name) - 1;
-								}
-								return b.rdm[0] - a.rdm[0]; // desc
-							});
+                            // order results
+                            result.value.totals.sort(function (a, b) {
+                                if (a.rdm[0] === b.rdm[0]) {
+                                    return +(a.name > b.name) || +(a.name === b.name) - 1;
+                                }
+                                return b.rdm[0] - a.rdm[0]; // desc
+                            });
 
-							var container = $(document.getElementById('flight-module-' + result.value.id.replace(/;/g, '_')));
-							if (container.length) {
-								var addDisclaimer = function (carrier) {
-									if (carrier == 'UA' || carrier == 'DL' || carrier == 'AA') {
-										return '<span title="Revenue-based earning is overestimated because taxes are included in the base fare." style="color: #f00; cursor: help;">*</span>';
-									}
-									return '';
-								};
+                            var container = $(document.getElementById('flight-module-' + result.value.id.replace(/;/g, '_')));
+                            if (container.length) {
+                                var addDisclaimer = function (carrier) {
+                                    if (carrier == 'UA' || carrier == 'DL' || carrier == 'AA') {
+                                        return '<span title="Revenue-based earning is overestimated because taxes are included in the base fare." style="color: #f00; cursor: help;">*</span>';
+                                    }
+                                    return '';
+                                };
 
-								var html =
-									'<div class="wheretocredit-wrapper secondary">' +
-									'<div class="wheretocredit-container">' +
-									(result.value.totals.length ? result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.rdm[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + '&nbsp;' + seg.name.replace(' ', '&nbsp;') + '&nbsp;miles</div>'; }).join('') : 'No known mileage earnings.') +
-									'<p class="wheretocredit-message"><strong>Enjoying the miles? Help us out, rate us and leave feedback in the <a href="//chrome.google.com/webstore/detail/mileage-calculator-by-whe/gomddcmabinakjildbgfoabbiakfkkfk" target="_blank">Chrome Web Store</a>.</strong></p>' +
+                                var html =
+                                    '<div class="wheretocredit-wrapper secondary">' +
+                                    '<div class="wheretocredit-container">' +
+                                    (result.value.totals.length ? result.value.totals.map(function (seg, i) { return '<div class="wheretocredit-item">' + seg.rdm[0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + addDisclaimer(seg.id) + '&nbsp;' + seg.name.replace(' ', '&nbsp;') + '&nbsp;miles</div>'; }).join('') : 'No known mileage earnings.') +
+                                    '<p class="wheretocredit-message"><strong>Enjoying the miles? Help us out, rate us and leave feedback in the <a href="//chrome.google.com/webstore/detail/mileage-calculator-by-whe/gomddcmabinakjildbgfoabbiakfkkfk" target="_blank">Chrome Web Store</a>.</strong></p>' +
                                     '<p class="wheretocredit-message">Data provided by <a href="//www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</p>' +
-									'</div>' +
-									'</div>';
+                                    '</div>' +
+                                    '</div>';
 
-								container.append(html);
+                                var $fareRule = $('<a class="wheretocredit-message" href="javascript:void(0);""><strong>Fare rules</strong></a>');
+                                $fareRule.click(function () {
+                                    $.ajax('/api/flight/trip/create', {
+                                        type : 'POST',
+                                        data : {
+                                            productKey: result.value.id
+                                        },
+                                    }).then(function (results) {
+                                        if (results.createTripStatus == 'SUCCESS') {
+                                            window.open('/Fare-Rules?tripid=' + results.newTrip.tripId, '_blank');
+                                        }
+                                    });
+                                });
 
-								// ga event
-								var btn = container.find('button');
-								if (btn.length) {
-									var price = getOfferPrice(offers[result.value.id]);
-									var value = (price - bestPrice) / bestPrice;
-									value = Math.round(value * 1000); // ga only tracks ints
-									btn.click(function () {
-										wtcga('wtc.send', 'event', 'Trips', 'Select', ota, value);
-									});
-								}
-							}
+                                var $html = $(html);
+                                $html.find('.wheretocredit-message:first').before($fareRule);
+                                container.append($html);
+
+                                // ga event
+                                var btn = container.find('button');
+                                if (btn.length) {
+                                    var price = getOfferPrice(offers[result.value.id]);
+                                    var value = (price - bestPrice) / bestPrice;
+                                    value = Math.round(value * 1000); // ga only tracks ints
+                                    btn.click(function () {
+                                        wtcga('wtc.send', 'event', 'Trips', 'Select', ota, value);
+                                    });
+                                }
+                            }
                         }
 
                         setTimeout(function() { asyncLoop(i+1); }, 0);
@@ -131,14 +147,14 @@ var main = function () {
                         }
                         return {
                             id: natrualKey,
-							baseFare: offer.price.exactPrice,
-							currency: offer.price.currencyCode,
+                            baseFare: offer.price.exactPrice,
+                            currency: offer.price.currencyCode,
                             segments: $.map(offer.legs, getSegments)
                         };
                     });
-					data.sort(function (a, b) {
-						return a.baseFare - b.baseFare; // asc
-					});
+                    data.sort(function (a, b) {
+                        return a.baseFare - b.baseFare; // asc
+                    });
                     callback(data, uiModel.rawData.offers);
                 });
             });
