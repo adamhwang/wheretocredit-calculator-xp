@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wheretocredit.com calculator
 // @namespace    https://github.com/adamhwang/wheretocredit-calculator-xp
-// @version      1.2.2
+// @version      1.2.4
 // @description  Displays the number of frequent flyer miles you can earn with Expedia, Orbitz, Travelocity, Hotwire, Cheaptickets, Hotels.com, Wotif, ebookers, MrJet and SNCF! (all unaffiliated)
 // @author       wheretocredit.com
 // @include      http*://*.expedia.*/Flights-Search*
@@ -23,8 +23,8 @@
 // ==/UserScript==
 
 var main = function () {
-    var calc;
-    getData (function(data, offers) {
+    var calc, offers;
+    getData (function(data) {
         calc = calc || $.ajax('//www.wheretocredit.com/api/2.0/calculate', {
             type : 'POST',
             contentType : 'application/json',
@@ -74,24 +74,8 @@ var main = function () {
                                     '<p class="wheretocredit-message">Data provided by <a href="//www.wheretocredit.com" target="_blank">wheretocredit.com</a> and is not affiliated or sponsored by ' + ota + '.  Your mileage may vary.</p>' +
                                     '</div>' +
                                     '</div>';
-
-                                var $fareRule = $('<a class="wheretocredit-message" href="javascript:void(0);""><strong>Fare rules</strong></a>');
-                                $fareRule.click(function () {
-                                    $.ajax('/api/flight/trip/create', {
-                                        type : 'POST',
-                                        data : {
-                                            productKey: result.value.id
-                                        },
-                                    }).then(function (results) {
-                                        if (results.createTripStatus == 'SUCCESS') {
-                                            window.open('/Fare-Rules?tripid=' + results.newTrip.tripId, '_blank');
-                                        }
-                                    });
-                                });
-
-                                var $html = $(html);
-                                $html.find('.wheretocredit-message:first').before($fareRule);
-                                container.append($html);
+                                    
+                                container.append(html);
 
                                 // ga event
                                 var btn = container.find('button');
@@ -134,7 +118,8 @@ var main = function () {
 
             flights.vent.on('uiModel.resetViewableOffers', function() {
                 require(['uiModel'], function (uiModel) {
-                    var data = $.map(uiModel.rawData.offers, function (offer, natrualKey) {
+                    offers = uiModel.rawData.offers;
+                    var data = $.map(offers, function (offer, natrualKey) {
                         if (flights && flights.collections && flights.legsCollection)
                         {
                             return {
@@ -155,7 +140,7 @@ var main = function () {
                     data.sort(function (a, b) {
                         return a.baseFare - b.baseFare; // asc
                     });
-                    callback(data, uiModel.rawData.offers);
+                    callback(data);
                 });
             });
         });

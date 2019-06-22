@@ -2,7 +2,7 @@
 	"manifest_version" : 2,
 	"name" : "Mileage Calculator by wheretocredit.com",
 	"short_name": "Mileage Calculator",
-	"version" : "1.2.2",
+	"version" : "1.2.4",
 	"description" : "See the number of frequent flyer miles you could earn with Expedia, Orbitz, Travelocity, Hotwire, and more! (all unaffiliated)",
 	"icons": {
 		"16": "icon16.png",
